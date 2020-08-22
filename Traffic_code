@@ -1,0 +1,201 @@
+module traffic_control(north_road,east_road,south_road,west_road,clk,rst);
+south
+STOP count
+Yes
+ output reg [2:0] north_road,east_road,south_road,west_road; //Declaration of
+4 roads
+ input clk;
+ input rst;
+
+ reg [2:0] state;
+
+ parameter [2:0] north = 3'b000;
+ parameter [2:0] north_y = 3'b001; //Declaration of yellow light state
+ parameter [2:0] east = 3'b010;
+ parameter [2:0] east_y = 3'b011; //Declaration of yellow light state
+ parameter [2:0] south = 3'b100;
+ parameter [2:0] south_y = 3'b101; //Declaration of yellow light state
+ parameter [2:0] west = 3'b110;
+ parameter [2:0] west_y = 3'b111; //Declaration of yellow light state
+ reg [2:0] count;
+
+ always @(posedge clk, posedge rst)
+ begin
+ if (rst)
+ begin
+ state = north;
+ count = 3'b000;
+ end
+ else
+ begin
+ case (state)
+ north :
+ begin
+ if (count == 3'b111) //Changes to yellow light state
+ begin
+ count = 3'b000;
+ state = north_y;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 8 clock pulses
+ state = north;
+ end
+ end
+ north_y :
+ begin
+ if (count == 3'b011) //Road change
+ begin
+ count = 3'b000;
+ state = east;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 4 clock pulses
+ state = north_y;
+ end
+ end
+ east :
+ begin
+ if (count == 3'b111) //Changes to yellow light state
+ begin
+ count = 3'b0;
+ state = east_y;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 8 clock pulses
+ state = east;
+ end
+ end
+ east_y :
+ begin
+ if (count == 3'b011) //Road change
+ begin
+ count = 3'b0;
+ state = south;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 4 clock pulses
+ state = east_y;
+ end
+ end
+ south :
+ begin
+ if (count == 3'b111) //Changes to yellow light state
+ begin
+ count = 3'b0;
+ state = south_y;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 8 clock pulses
+ state = south;
+ end
+ end
+ south_y :
+ begin
+ if (count == 3'b011) //Road change
+ begin
+ count = 3'b0;
+ state = west;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 4 clock pulses
+ state = south_y;
+ end
+ end
+ west :
+ begin
+ if (count == 3'b111) //Changes to yellow light state
+ begin
+ state = west_y;
+ count = 3'b0;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 8 clock pulses
+ state = west;
+ end
+ end
+ west_y :
+ begin
+ if (count == 3'b011) //Road change
+ begin
+ state = north;
+ count = 3'b0;
+ end
+ else
+ begin
+ count = count+3'b001; //Count's for 4 clock pulses
+ state = west_y;
+ end
+ end
+ endcase
+ end
+ end
+//Red light value='100', Yellow light value='010', Green light value='001'
+always @(state)
+ begin
+ case (state)
+ north :
+ begin
+ north_road = 3'b001;
+ south_road = 3'b100;
+ east_road = 3'b100;
+ west_road = 3'b100;
+ end
+ north_y :
+ begin
+ north_road = 3'b010;
+ south_road = 3'b100;
+ east_road = 3'b100;
+ west_road = 3'b100;
+ end
+ east :
+ begin
+ north_road = 3'b100;
+ south_road = 3'b001;
+ east_road = 3'b100;
+ west_road = 3'b100;
+ end
+ east_y :
+ begin
+ north_road = 3'b100;
+ south_road = 3'b010;
+ east_road = 3'b100;
+ west_road = 3'b100;
+ end
+ south :
+ begin
+ north_road = 3'b100;
+ south_road = 3'b100;
+ east_road = 3'b100;
+ west_road = 3'b001;
+ end
+ south_y :
+ begin
+ north_road = 3'b100;
+ south_road = 3'b100;
+ east_road = 3'b100;
+ west_road = 3'b010;
+ end
+ west :
+ begin
+ north_road = 3'b100;
+ south_road = 3'b100;
+ east_road = 3'b001;
+ west_road = 3'b100;
+ end
+ west_y :
+ begin
+ north_road = 3'b100;
+ south_road = 3'b100;
+ east_road = 3'b010;
+ west_road = 3'b100;
+ end
+ endcase
+ end
+endmodule
